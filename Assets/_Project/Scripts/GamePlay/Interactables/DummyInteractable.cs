@@ -10,9 +10,17 @@ namespace Project.Gameplay.Interactables
         public string PromptText => promptText;
         public bool CanInteract => true;
 
+        public InteractionType Type => InteractionType.Instant;
+
+        public float HoldDuration => 0f;
+
         public void Interact()
         {
             Debug.Log("Hello! Interacted with: " + gameObject.name);
         }
+
+        public void OnHoldStart() { }
+        public void OnHoldComplete() { }
+        public void OnHoldCancel() { }
     }
 }

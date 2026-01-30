@@ -18,10 +18,14 @@ namespace Project.Core.Interaction
 
         private IInteractable _current;
 
+        private bool _isHolding;
+        private float _holdTimer;
+
         private void Update()
         {
             Detect();
             HandleInput();
+            UpdateHold();
         }
 
         private void Detect()
@@ -40,6 +44,8 @@ namespace Project.Core.Interaction
 
             if (!ReferenceEquals(_current, found))
             {
+                CancelHoldIfNeeded();
+
                 _current = found;
 
                 if (_current != null && _current.CanInteract)
@@ -54,7 +60,7 @@ namespace Project.Core.Interaction
             }
             else
             {
-                // ayný objeye bakýyorsak ama CanInteract deðiþtiyse prompt'u güncelle
+                // ayný hedef, prompt güncel kalsýn
                 if (_current != null)
                 {
                     if (_current.CanInteract)
@@ -70,10 +76,70 @@ namespace Project.Core.Interaction
             if (_current == null) return;
             if (!_current.CanInteract) return;
 
-            if (Input.GetKeyDown(interactKey))
+            switch (_current.Type)
             {
-                _current.Interact();
+                case InteractionType.Instant:
+                case InteractionType.Toggle:
+                    if (Input.GetKeyDown(interactKey))
+                    {
+                        _current.Interact();
+                    }
+                    break;
+
+                case InteractionType.Hold:
+                    if (Input.GetKeyDown(interactKey))
+                    {
+                        StartHold();
+                    }
+
+                    if (Input.GetKeyUp(interactKey))
+                    {
+                        CancelHoldIfNeeded();
+                    }
+                    break;
             }
+        }
+
+        private void StartHold()
+        {
+            if (_isHolding) return;
+
+            _isHolding = true;
+            _holdTimer = 0f;
+
+            _current.OnHoldStart();
+            interactionUI?.ShowHoldProgress(0f);
+        }
+
+        private void UpdateHold()
+        {
+            if (!_isHolding) return;
+            if (_current == null) { CancelHoldIfNeeded(); return; }
+
+            float duration = Mathf.Max(0.01f, _current.HoldDuration);
+            _holdTimer += Time.deltaTime;
+
+            float normalized = Mathf.Clamp01(_holdTimer / duration);
+            interactionUI?.ShowHoldProgress(normalized);
+
+            if (_holdTimer >= duration)
+            {
+                _isHolding = false;
+                interactionUI?.HideHold();
+
+                _current.OnHoldComplete();
+            }
+        }
+
+        private void CancelHoldIfNeeded()
+        {
+            if (!_isHolding) return;
+
+            _isHolding = false;
+            _holdTimer = 0f;
+
+            interactionUI?.HideHold();
+            _current?.OnHoldCancel();
         }
     }
 }
