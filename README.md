@@ -88,3 +88,52 @@ Sistem; interface tabanlı mimari, interaction type ayrımı ve basit inventory 
 
 ## Proje Yapısı
 
+Assets/_Project
+├ Scenes
+├ Scripts
+│ ├ Core
+│ │ ├ Interaction
+│ │ ├ Inventory
+│ │ └ Player
+│ ├ Gameplay
+│ │ └ Interactables
+│ └ UI
+├ ScriptableObjects
+└ Docs
+
+
+---
+
+## Design Decisions
+
+- Raycast based interaction tercih edildi (trigger yerine)
+- Interface tabanlı yapı kullanıldı (`IInteractable`)
+- InteractionType enum ile davranış ayrımı yapıldı
+- Inventory HashSet ile tutuldu (ID bazlı)
+- Event driven switch-door bağlantısı
+
+---
+
+## Known Limitations / Trade-offs
+
+- Kapı animasyonları instant (tween kullanılmadı)
+- Görsel polish minimum seviyede tutuldu
+- Inventory UI her frame refresh ediliyor (basitlik adına)
+
+---
+
+## Time Distribution (yaklaşık)
+
+- Core movement + camera: ~30 dk
+- Interaction system: ~2 saat
+- Inventory + keys: ~1 saat
+- Door / Switch / Chest: ~2 saat
+- UI + debugging + cleanup: ~1 saat
+- Docs + test: ~30 dk
+
+---
+
+## LLM Usage
+
+LLM (ChatGPT) mimari planlama ve bazı sistem taslakları için kullanılmıştır.  
+Detaylı kayıtlar `PROMPTS.md` dosyasında yer almaktadır.
